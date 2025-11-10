@@ -16,7 +16,13 @@ interface SummarizeOutput {
   tags: string[];
 }
 
-const FALLBACK_TAGS = ["ideas", "reflection", "productivity", "strategy", "learning"];
+const FALLBACK_TAGS = [
+  "ideas",
+  "reflection",
+  "productivity",
+  "strategy",
+  "learning",
+];
 
 export async function summarizeMemory({
   title,
@@ -47,21 +53,21 @@ export async function summarizeMemory({
         response.output_text ?? outputs?.[0]?.content?.[0]?.text ?? "";
       const [firstLine, secondLine] = text.split("\n").filter(Boolean);
       const summary = firstLine?.trim() ?? text.trim();
-        const tagsLine = secondLine?.includes("#")
-          ? secondLine
-          : outputs?.[0]?.content?.[1]?.text ?? "";
-        const tags = tagsLine
-          ? Array.from(
-              new Set<string>(
-                tagsLine
-                  .toLowerCase()
-                  .replace(/[^#\w,\s]/g, "")
-                  .split(/[#,\s]+/)
-                  .filter((token: string) => token.length > 0)
-                  .slice(0, 5),
-              ),
-            ).map((tag) => tag.trim())
-          : FALLBACK_TAGS.slice(0, 3);
+      const tagsLine = secondLine?.includes("#")
+        ? secondLine
+        : (outputs?.[0]?.content?.[1]?.text ?? "");
+      const tags = tagsLine
+        ? Array.from(
+            new Set<string>(
+              tagsLine
+                .toLowerCase()
+                .replace(/[^#\w,\s]/g, "")
+                .split(/[#,\s]+/)
+                .filter((token: string) => token.length > 0)
+                .slice(0, 5),
+            ),
+          ).map((tag) => tag.trim())
+        : FALLBACK_TAGS.slice(0, 3);
       return {
         summary,
         tags,

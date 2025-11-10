@@ -4,8 +4,12 @@ import { z } from "zod";
 
 import { embedText } from "@/lib/ai/embeddings";
 import { summarizeMemory } from "@/lib/ai/summarize";
-import { getMemoryRepository } from "@/lib/repository/memory-repository";
-import type { MemoryKind, MemoryNode } from "@/lib/types";
+import { getServerSession } from "@/lib/auth/supabase-server";
+import {
+  DEFAULT_DEMO_USER_ID,
+  getMemoryRepository,
+} from "@/lib/repository/memory-repository";
+import type { MemoryKind } from "@/lib/types";
 
 const createMemorySchema = z.object({
   title: z.string().min(2),
@@ -16,10 +20,13 @@ const createMemorySchema = z.object({
 });
 
 export async function GET() {
+  const { session } = await getServerSession();
+  const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+
   const repository = getMemoryRepository();
   const [memories, edges] = await Promise.all([
-    repository.listMemories(),
-    repository.listEdges(),
+    repository.listMemories(userId),
+    repository.listEdges(userId),
   ]);
   return NextResponse.json({ memories, edges });
 }
@@ -46,8 +53,11 @@ export async function POST(request: Request) {
 
     await embedText(`${parsed.title}\n${parsed.content}`);
 
+    const { session } = await getServerSession();
+    const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+
     const repository = getMemoryRepository();
-    const created = await repository.createMemory({
+    const created = await repository.createMemory(userId, {
       title: parsed.title,
       kind: parsed.kind as MemoryKind,
       source: "upload",
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
         scheme: "aes-256-gcm",
         keyVersion: "demo",
       },
-    } as Omit<MemoryNode, "id" | "createdAt" | "updatedAt">);
+    });
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

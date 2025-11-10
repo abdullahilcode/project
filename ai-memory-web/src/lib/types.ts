@@ -2,6 +2,7 @@ export type MemoryKind = "text" | "voice" | "image" | "link" | "document";
 
 export interface MemoryNode {
   id: string;
+  userId: string;
   title: string;
   kind: MemoryKind;
   source?: "upload" | "recording" | "import" | "ai";
@@ -37,6 +38,7 @@ export interface MemoryNode {
 
 export interface MemoryEdge {
   id: string;
+  userId: string;
   source: string;
   target: string;
   relationship: string;

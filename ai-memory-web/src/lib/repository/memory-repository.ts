@@ -1,19 +1,28 @@
 import { randomUUID } from "node:crypto";
 
 import { serverEnv } from "@/lib/env";
-import { getDemoData } from "@/lib/demo-data";
+import { DEMO_USER_ID, getDemoData } from "@/lib/demo-data";
 import type { MemoryEdge, MemoryNode, MemorySearchResult } from "@/lib/types";
 
+export const DEFAULT_DEMO_USER_ID = DEMO_USER_ID;
+
 export interface MemoryRepository {
-  listMemories(): Promise<MemoryNode[]>;
-  getMemoryById(id: string): Promise<MemoryNode | null>;
-  createMemory(memory: Omit<MemoryNode, "id" | "createdAt" | "updatedAt">): Promise<MemoryNode>;
+  listMemories(userId: string): Promise<MemoryNode[]>;
+  getMemoryById(userId: string, id: string): Promise<MemoryNode | null>;
+  createMemory(
+    userId: string,
+    memory: Omit<MemoryNode, "id" | "createdAt" | "updatedAt" | "userId">,
+  ): Promise<MemoryNode>;
   upsertMemory(memory: MemoryNode): Promise<MemoryNode>;
-  deleteMemory(id: string): Promise<void>;
-  listEdges(): Promise<MemoryEdge[]>;
+  deleteMemory(userId: string, id: string): Promise<void>;
+  listEdges(userId: string): Promise<MemoryEdge[]>;
   upsertEdge(edge: MemoryEdge): Promise<MemoryEdge>;
-  deleteEdge(id: string): Promise<void>;
-  searchMemories(query: string, topK?: number): Promise<MemorySearchResult[]>;
+  deleteEdge(userId: string, id: string): Promise<void>;
+  searchMemories(
+    userId: string,
+    query: string,
+    topK?: number,
+  ): Promise<MemorySearchResult[]>;
 }
 
 type MemoryStore = {
@@ -27,23 +36,26 @@ const inMemoryStore: MemoryStore = {
 };
 
 class InMemoryRepository implements MemoryRepository {
-  async listMemories() {
-    return Array.from(inMemoryStore.memories.values()).sort((a, b) =>
-      a.createdAt < b.createdAt ? 1 : -1,
-    );
+  async listMemories(userId: string) {
+    return Array.from(inMemoryStore.memories.values())
+      .filter((memory) => memory.userId === userId)
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }
 
-  async getMemoryById(id: string) {
-    return inMemoryStore.memories.get(id) ?? null;
+  async getMemoryById(userId: string, id: string) {
+    const memory = inMemoryStore.memories.get(id);
+    return memory?.userId === userId ? memory : null;
   }
 
   async createMemory(
-    memory: Omit<MemoryNode, "id" | "createdAt" | "updatedAt">,
+    userId: string,
+    memory: Omit<MemoryNode, "id" | "createdAt" | "updatedAt" | "userId">,
   ) {
     const now = new Date().toISOString();
     const created: MemoryNode = {
       ...memory,
       id: randomUUID(),
+      userId,
       createdAt: now,
       updatedAt: now,
     };
@@ -56,17 +68,24 @@ class InMemoryRepository implements MemoryRepository {
     return memory;
   }
 
-  async deleteMemory(id: string) {
+  async deleteMemory(userId: string, id: string) {
+    const existing = inMemoryStore.memories.get(id);
+    if (!existing || existing.userId !== userId) {
+      return;
+    }
     inMemoryStore.memories.delete(id);
-    for (const edge of inMemoryStore.edges.values()) {
+    for (const edge of Array.from(inMemoryStore.edges.values())) {
+      if (edge.userId !== userId) continue;
       if (edge.source === id || edge.target === id) {
         inMemoryStore.edges.delete(edge.id);
       }
     }
   }
 
-  async listEdges() {
-    return Array.from(inMemoryStore.edges.values());
+  async listEdges(userId: string) {
+    return Array.from(inMemoryStore.edges.values()).filter(
+      (edge) => edge.userId === userId,
+    );
   }
 
   async upsertEdge(edge: MemoryEdge) {
@@ -74,12 +93,14 @@ class InMemoryRepository implements MemoryRepository {
     return edge;
   }
 
-  async deleteEdge(id: string) {
+  async deleteEdge(userId: string, id: string) {
+    const existing = inMemoryStore.edges.get(id);
+    if (!existing || existing.userId !== userId) return;
     inMemoryStore.edges.delete(id);
   }
 
-  async searchMemories(query: string, topK = 10) {
-    const all = await this.listMemories();
+  async searchMemories(userId: string, query: string, topK = 10) {
+    const all = await this.listMemories(userId);
     const normalizedQuery = query.toLowerCase();
     const results = all
       .map((memory) => {
@@ -119,27 +140,31 @@ class InMemoryRepository implements MemoryRepository {
 let repository: MemoryRepository | null = null;
 let seeded = false;
 
+function seedInMemoryRepository() {
+  if (seeded) return;
+  const demo = getDemoData();
+  demo.memories.forEach((memory) => {
+    inMemoryStore.memories.set(memory.id, memory);
+  });
+  demo.edges.forEach((edge) => {
+    inMemoryStore.edges.set(edge.id, edge);
+  });
+  seeded = true;
+}
+
 export function getMemoryRepository(): MemoryRepository {
   if (repository) {
     return repository;
   }
 
   if (!serverEnv.DATABASE_URL) {
+    seedInMemoryRepository();
     repository = new InMemoryRepository();
-    if (!seeded) {
-      const demo = getDemoData();
-      demo.memories.forEach((memory) => {
-        void repository?.upsertMemory(memory);
-      });
-      demo.edges.forEach((edge) => {
-        void repository?.upsertEdge(edge);
-      });
-      seeded = true;
-    }
     return repository;
   }
 
   // TODO: Implement Prisma/Supabase-backed repository when database is configured.
+  seedInMemoryRepository();
   repository = new InMemoryRepository();
   return repository;
 }

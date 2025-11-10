@@ -2,9 +2,12 @@ import { randomUUID } from "node:crypto";
 
 import type { MemoryEdge, MemoryNode } from "@/lib/types";
 
+export const DEMO_USER_ID = "demo-user";
+
 const seededMemories: MemoryNode[] = [
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     title: "2024 Startup Vision Brainstorm",
     kind: "text",
     source: "import",
@@ -29,6 +32,7 @@ const seededMemories: MemoryNode[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     title: "Design + Psychology Intersection Notes",
     kind: "document",
     source: "upload",
@@ -53,6 +57,7 @@ const seededMemories: MemoryNode[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     title: "Voice Reflection: Creative Flow Ritual",
     kind: "voice",
     source: "recording",
@@ -82,6 +87,7 @@ const seededMemories: MemoryNode[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     title: "Link: Spatial Computing Market Brief",
     kind: "link",
     source: "import",
@@ -112,6 +118,7 @@ const seededMemories: MemoryNode[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     title: "Design Review: Memory Graph Prototype",
     kind: "image",
     source: "upload",
@@ -141,6 +148,7 @@ const seededMemories: MemoryNode[] = [
 const seededEdges: MemoryEdge[] = [
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     source: seededMemories[0].id,
     target: seededMemories[1].id,
     relationship: "builds-upon",
@@ -149,6 +157,7 @@ const seededEdges: MemoryEdge[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     source: seededMemories[0].id,
     target: seededMemories[2].id,
     relationship: "inspires",
@@ -157,6 +166,7 @@ const seededEdges: MemoryEdge[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     source: seededMemories[1].id,
     target: seededMemories[3].id,
     relationship: "references",
@@ -165,6 +175,7 @@ const seededEdges: MemoryEdge[] = [
   },
   {
     id: randomUUID(),
+    userId: DEMO_USER_ID,
     source: seededMemories[4].id,
     target: seededMemories[0].id,
     relationship: "visualizes",

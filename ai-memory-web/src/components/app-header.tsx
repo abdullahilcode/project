@@ -7,8 +7,16 @@ import { MicVocal, Plus, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/components/auth-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useMemoryStore } from "@/store/memory-store";
 import { useUIStore } from "@/store/ui-store";
@@ -25,6 +33,7 @@ export function AppHeader() {
       setSelectedMemory: state.setSelectedMemory,
     }),
   );
+  const { user, signInWithOAuth, signOut } = useAuth();
 
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -78,6 +87,18 @@ export function AppHeader() {
     if (!query.trim()) return;
     searchMutation.mutate(query.trim());
   };
+
+  const initials =
+    user?.user_metadata?.full_name
+      ?.split(" ")
+      .map((part: string) => part.at(0))
+      .join("")
+      .toUpperCase() ||
+    user?.email?.[0]?.toUpperCase() ||
+    "U";
+
+  const displayName =
+    user?.user_metadata?.full_name ?? user?.email ?? "Unknown explorer";
 
   return (
     <header className="sticky top-0 z-30 flex h-20 w-full items-center justify-between border-b border-border/70 bg-gradient-to-br from-white/80 via-white/60 to-white/40 px-6 backdrop-blur-3xl dark:from-zinc-950/60 dark:via-zinc-950/40 dark:to-zinc-950/30">
@@ -136,7 +157,9 @@ export function AppHeader() {
             disabled={searchMutation.isPending}
           >
             {searchMutation.isPending ? (
-              <span className="animate-pulse text-muted-foreground">Searching…</span>
+              <span className="animate-pulse text-muted-foreground">
+                Searching…
+              </span>
             ) : (
               <>
                 <Sparkles className="size-4 text-brand" />
@@ -174,6 +197,76 @@ export function AppHeader() {
         </Button>
 
         <ThemeToggle />
+
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full border border-border/70 bg-white/70 shadow-inner-neon hover:bg-white/90"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="px-3 py-2 text-xs text-muted-foreground">
+                Signed in as
+                <div className="truncate text-sm text-foreground">
+                  {displayName}
+                </div>
+              </div>
+              <DropdownMenuItem
+                onClick={() => {
+                  void signOut();
+                }}
+              >
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-brand/50 text-brand hover:bg-brand/10"
+                >
+                  Sign in
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => {
+                    void signInWithOAuth("google");
+                  }}
+                >
+                  Continue with Google
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    void signInWithOAuth("github");
+                  }}
+                >
+                  Continue with GitHub
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    void signInWithOAuth("apple");
+                  }}
+                >
+                  Continue with Apple
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
     </header>
   );

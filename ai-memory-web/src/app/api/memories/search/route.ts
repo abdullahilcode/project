@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getMemoryRepository } from "@/lib/repository/memory-repository";
+import { getServerSession } from "@/lib/auth/supabase-server";
+import {
+  DEFAULT_DEMO_USER_ID,
+  getMemoryRepository,
+} from "@/lib/repository/memory-repository";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -16,8 +20,15 @@ export async function GET(request: NextRequest) {
       limit: searchParams.get("limit") ?? undefined,
     });
 
+    const { session } = await getServerSession();
+    const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+
     const repository = getMemoryRepository();
-    const results = await repository.searchMemories(parsed.q ?? "", parsed.limit);
+    const results = await repository.searchMemories(
+      userId,
+      parsed.q ?? "",
+      parsed.limit,
+    );
 
     return NextResponse.json({ results });
   } catch (error) {

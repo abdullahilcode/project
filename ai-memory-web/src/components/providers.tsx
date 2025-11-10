@@ -1,15 +1,18 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { Session } from "@supabase/supabase-js";
 import { type ReactNode, useState } from "react";
 
+import { AuthProvider } from "@/components/auth-provider";
 import { AppToaster } from "@/components/ui/app-toaster";
 
 interface ProvidersProps {
   children: ReactNode;
+  initialSession: Session | null;
 }
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, initialSession }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -23,9 +26,11 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <AppToaster />
-    </QueryClientProvider>
+    <AuthProvider initialSession={initialSession}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <AppToaster />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }

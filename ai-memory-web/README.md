@@ -10,6 +10,7 @@ AI Memory Web is an AI-first personal knowledge cloud that captures anything you
 - **Chat with your mind** – Retrieval-augmented chat over your memories with references back to source items.
 - **Realtime ready architecture** – Supabase Auth/Postgres/Realtime + Prisma schema, with in-memory fallback for local demos.
 - **Modern UX stack** – Next.js 16 (App Router), Tailwind CSS v4, shadcn/ui, Framer Motion, Zustand, TanStack Query.
+- **Secure multi-tenant auth** – Supabase OAuth (Google, GitHub, Apple) with row-level security to isolate each user’s graph.
 
 ## Tech Stack
 
@@ -65,6 +66,13 @@ cp .env.example .env.local
 
 If environment variables are omitted the app transparently falls back to an in-memory data store and mock AI summarisation so that the UI remains fully navigable.
 
+## Authentication
+
+1. Enable the providers you want (Google, GitHub, Apple) in **Supabase → Authentication → Providers**.
+2. Set each provider’s redirect URL to `https://your-domain/auth/callback` (and `http://localhost:3000/auth/callback` for local dev).
+3. Run the SQL in `supabase/policies.sql` to create row-level security policies for `User`, `Memory`, and `MemoryEdge`.
+4. The UI exposes sign-in/out controls in the top-right of the dashboard; the app falls back to a seeded demo brain when no session is present.
+
 ## Setup & Development
 
 ```bash
@@ -97,7 +105,8 @@ npm run start
 
 1. Enable pgvector in your Supabase project (`create extension if not exists vector;`).
 2. Update `DATABASE_URL` and run migrations (e.g. `prisma migrate deploy`).
-3. Adjust `prisma/schema.prisma` to tune vector dimensions or table structure as needed.
+3. Execute the policies in `supabase/policies.sql` if you haven’t already.
+4. Adjust `prisma/schema.prisma` to tune vector dimensions or table structure as needed.
 
 ## Deployment
 

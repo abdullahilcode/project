@@ -8,7 +8,11 @@ import { MemoryChatPanel } from "@/features/memory/components/memory-chat-panel"
 import { InsightsPanel } from "@/features/memory/components/insights-panel";
 import { UploadMemoryDialog } from "@/features/memory/components/upload-memory-dialog";
 import { VoiceRecorderSheet } from "@/features/memory/components/voice-recorder-sheet";
-import { getMemoryRepository } from "@/lib/repository/memory-repository";
+import { getServerSession } from "@/lib/auth/supabase-server";
+import {
+  DEFAULT_DEMO_USER_ID,
+  getMemoryRepository,
+} from "@/lib/repository/memory-repository";
 import type { MemoryInsight, MemoryNode } from "@/lib/types";
 
 function generateInsights(memories: MemoryNode[]): MemoryInsight[] {
@@ -25,8 +29,7 @@ function generateInsights(memories: MemoryNode[]): MemoryInsight[] {
     {
       id: "insight-cluster-design",
       title: "Design ↔ Psychology Cluster Strengthening",
-      body:
-        "Your recent uploads continue reinforcing the bridge between design rituals and behavior psychology. Consider drafting a playbook that links these insights to onboarding flows.",
+      body: "Your recent uploads continue reinforcing the bridge between design rituals and behavior psychology. Consider drafting a playbook that links these insights to onboarding flows.",
       type: "cluster",
       relatedMemoryIds: designRelated.map((memory) => memory.id),
       createdAt: new Date().toISOString(),
@@ -34,8 +37,7 @@ function generateInsights(memories: MemoryNode[]): MemoryInsight[] {
     {
       id: "insight-trend-voice",
       title: "Voice reflections shaping product vision",
-      body:
-        "Voice logs now capture 32% of new memories this month. Whisper transcription quality remains high—opportunity to automate journaling prompts ahead of deep work sessions.",
+      body: "Voice logs now capture 32% of new memories this month. Whisper transcription quality remains high—opportunity to automate journaling prompts ahead of deep work sessions.",
       type: "trend",
       relatedMemoryIds: memories
         .filter((memory) => memory.kind === "voice")
@@ -54,9 +56,14 @@ function generateInsights(memories: MemoryNode[]): MemoryInsight[] {
 }
 
 export default async function Home() {
+  const { session } = await getServerSession();
+  const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+
   const repository = getMemoryRepository();
-  const memories = await repository.listMemories();
-  const edges = await repository.listEdges();
+  const [memories, edges] = await Promise.all([
+    repository.listMemories(userId),
+    repository.listEdges(userId),
+  ]);
   const insights = generateInsights(memories);
 
   return (

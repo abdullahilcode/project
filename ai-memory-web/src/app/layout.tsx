@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getServerSession } from "@/lib/auth/supabase-server";
 import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
@@ -54,11 +55,13 @@ export const metadata: Metadata = {
   authors: [{ name: "AI Memory Web" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { session } = await getServerSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -69,7 +72,7 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider>
-          <Providers>{children}</Providers>
+          <Providers initialSession={session}>{children}</Providers>
           <Analytics />
         </ThemeProvider>
       </body>

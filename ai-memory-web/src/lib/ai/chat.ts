@@ -6,9 +6,9 @@ type ResponseContent = {
   content?: Array<{ text?: string }>;
 };
 
-export async function chatWithMemories(message: string) {
+export async function chatWithMemories(message: string, userId: string) {
   const repository = getMemoryRepository();
-  const searchResults = await repository.searchMemories(message, 4);
+  const searchResults = await repository.searchMemories(userId, message, 4);
   const openai = getOpenAIClient();
 
   const context = searchResults
@@ -50,10 +50,7 @@ export async function chatWithMemories(message: string) {
   }
 
   const fallback = searchResults
-    .map(
-      ({ memory }) =>
-        `• ${memory.title}: ${memory.summary}`,
-    )
+    .map(({ memory }) => `• ${memory.title}: ${memory.summary}`)
     .join("\n");
 
   return {
