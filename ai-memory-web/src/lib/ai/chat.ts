@@ -14,7 +14,9 @@ export async function chatWithMemories(message: string, userId: string) {
   const context = searchResults
     .map(
       ({ memory, score }) =>
-        `Title: ${memory.title}\nScore: ${score.toFixed(2)}\nSummary: ${memory.summary}\nContent: ${memory.content}\nTags: ${memory.tags.join(", ")}\n`,
+        `Title: ${memory.title ?? "Untitled memory"}\nScore: ${score.toFixed(2)}\nSummary: ${
+          memory.summary ?? ""
+        }\nContent: ${memory.content ?? memory.rawText ?? ""}\nTags: ${memory.tags.join(", ")}\n`,
     )
     .join("\n---\n");
 
@@ -50,7 +52,10 @@ export async function chatWithMemories(message: string, userId: string) {
   }
 
   const fallback = searchResults
-    .map(({ memory }) => `• ${memory.title}: ${memory.summary}`)
+    .map(
+      ({ memory }) =>
+        `• ${memory.title ?? "Untitled memory"}: ${memory.summary ?? "No summary yet."}`,
+    )
     .join("\n");
 
   return {

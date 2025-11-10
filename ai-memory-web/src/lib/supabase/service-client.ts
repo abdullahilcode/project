@@ -2,9 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import { clientEnv, serverEnv } from "@/lib/env";
 
-let serviceClient:
-  | ReturnType<typeof createClient>
-  | null = null;
+let serviceClient: ReturnType<typeof createClient> | null = null;
 
 export function getSupabaseServiceClient() {
   if (serviceClient) {

@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
-import { getServerSession } from "@/lib/auth/supabase-server";
+import { getServerSession } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 const geistSans = Geist({

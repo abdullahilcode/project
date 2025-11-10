@@ -8,7 +8,7 @@ import { MemoryChatPanel } from "@/features/memory/components/memory-chat-panel"
 import { InsightsPanel } from "@/features/memory/components/insights-panel";
 import { UploadMemoryDialog } from "@/features/memory/components/upload-memory-dialog";
 import { VoiceRecorderSheet } from "@/features/memory/components/voice-recorder-sheet";
-import { getServerSession } from "@/lib/auth/supabase-server";
+import { getServerSession } from "@/lib/supabase/server";
 import {
   DEFAULT_DEMO_USER_ID,
   getMemoryRepository,
@@ -47,7 +47,9 @@ function generateInsights(memories: MemoryNode[]): MemoryInsight[] {
     {
       id: "insight-reflection-latest",
       title: "Next Nudge",
-      body: `Ask the AI: “Draft action steps extending ${latest.title} into a public roadmap.” This keeps the momentum from your latest capture.`,
+      body: `Ask the AI: “Draft action steps extending ${
+        latest.title ?? "your latest capture"
+      } into a public roadmap.” This keeps the momentum from your latest capture.`,
       type: "reflection",
       relatedMemoryIds: [latest.id],
       createdAt: new Date().toISOString(),

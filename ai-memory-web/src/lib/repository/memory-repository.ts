@@ -58,6 +58,9 @@ class InMemoryRepository implements MemoryRepository {
       userId,
       createdAt: now,
       updatedAt: now,
+      importance: memory.importance ?? 0.5,
+      tags: memory.tags ?? [],
+      embeddingStatus: memory.embeddingStatus ?? "pending",
     };
     inMemoryStore.memories.set(created.id, created);
     return created;
@@ -76,7 +79,7 @@ class InMemoryRepository implements MemoryRepository {
     inMemoryStore.memories.delete(id);
     for (const edge of Array.from(inMemoryStore.edges.values())) {
       if (edge.userId !== userId) continue;
-      if (edge.source === id || edge.target === id) {
+      if (edge.fromId === id || edge.toId === id) {
         inMemoryStore.edges.delete(edge.id);
       }
     }
@@ -105,9 +108,10 @@ class InMemoryRepository implements MemoryRepository {
     const results = all
       .map((memory) => {
         const haystack = [
-          memory.title,
-          memory.summary,
-          memory.content,
+          memory.title ?? "",
+          memory.summary ?? "",
+          memory.content ?? "",
+          memory.rawText ?? "",
           memory.tags.join(" "),
           memory.transcript ?? "",
         ]

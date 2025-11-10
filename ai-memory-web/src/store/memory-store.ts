@@ -70,27 +70,27 @@ export const useMemoryStore = create<MemoryStoreState & MemoryStoreActions>()(
           }
           return { memories: mapped };
         }),
-        removeMemory: (memoryId) =>
-          set((state) => {
-            const { [memoryId]: _removed, ...rest } = state.memories;
-            void _removed;
-            return {
-              memories: rest,
-              edges: state.edges.filter(
-                (edge) => edge.source !== memoryId && edge.target !== memoryId,
+      removeMemory: (memoryId) =>
+        set((state) => {
+          const { [memoryId]: _removed, ...rest } = state.memories;
+          void _removed;
+          return {
+            memories: rest,
+            edges: state.edges.filter(
+              (edge) => edge.fromId !== memoryId && edge.toId !== memoryId,
+            ),
+            chatHistory: state.chatHistory.map((message) => ({
+              ...message,
+              memoryReferences: message.memoryReferences?.filter(
+                (id) => id !== memoryId,
               ),
-              chatHistory: state.chatHistory.map((message) => ({
-                ...message,
-                memoryReferences: message.memoryReferences?.filter(
-                  (id) => id !== memoryId,
-                ),
-              })),
-              selectedMemoryId:
-                state.selectedMemoryId === memoryId
-                  ? undefined
-                  : state.selectedMemoryId,
-            };
-          }),
+            })),
+            selectedMemoryId:
+              state.selectedMemoryId === memoryId
+                ? undefined
+                : state.selectedMemoryId,
+          };
+        }),
       linkMemories: (edge) =>
         set((state) => {
           const existing = state.edges.find((item) => item.id === edge.id);
@@ -134,9 +134,7 @@ export const useMemories = () =>
   useMemoryStore((state) => Object.values(state.memories));
 
 export const useMemoryById = (memoryId?: string) =>
-  useMemoryStore((state) =>
-    memoryId ? state.memories[memoryId] : undefined,
-  );
+  useMemoryStore((state) => (memoryId ? state.memories[memoryId] : undefined));
 
 export const useEdges = () => useMemoryStore((state) => state.edges);
 

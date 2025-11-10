@@ -67,12 +67,12 @@ export function MemoryGraph() {
     () =>
       edges.map((edge) => ({
         id: edge.id,
-        source: edge.source,
-        target: edge.target,
+        source: edge.fromId,
+        target: edge.toId,
         animated: true,
         label: edge.relationship,
         style: {
-          strokeWidth: 2,
+          strokeWidth: Math.max(1.5, edge.strength * 3),
         },
         labelStyle: {
           fill: "#a5b4fc",

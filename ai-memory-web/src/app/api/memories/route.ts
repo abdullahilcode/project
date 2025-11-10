@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { embedText } from "@/lib/ai/embeddings";
 import { summarizeMemory } from "@/lib/ai/summarize";
-import { getServerSession } from "@/lib/auth/supabase-server";
+import { getServerSession } from "@/lib/supabase/server";
 import {
   DEFAULT_DEMO_USER_ID,
   getMemoryRepository,
@@ -54,7 +54,10 @@ export async function POST(request: Request) {
     await embedText(`${parsed.title}\n${parsed.content}`);
 
     const { session } = await getServerSession();
-    const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+    const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const repository = getMemoryRepository();
     const created = await repository.createMemory(userId, {
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
       kind: parsed.kind as MemoryKind,
       source: "upload",
       summary,
+      rawText: parsed.content,
       content: parsed.content,
       transcript: undefined,
       tags: tagList,

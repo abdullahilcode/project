@@ -19,7 +19,10 @@ import type { MemoryNode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-const KIND_ICON: Record<MemoryNode["kind"], React.ComponentType<{ className?: string }>> = {
+const KIND_ICON: Record<
+  MemoryNode["kind"],
+  React.ComponentType<{ className?: string }>
+> = {
   text: PenSquare,
   document: BookOpen,
   voice: MicVocal,
@@ -33,12 +36,20 @@ interface MemoryCardProps {
   onSelect?: (memory: MemoryNode) => void;
 }
 
-export function MemoryCard({ memory, highlight = false, onSelect }: MemoryCardProps) {
+export function MemoryCard({
+  memory,
+  highlight = false,
+  onSelect,
+}: MemoryCardProps) {
   const Icon = KIND_ICON[memory.kind] ?? Workflow;
   const createdAt = useMemo(
     () => format(new Date(memory.createdAt), "PPP · p"),
     [memory.createdAt],
   );
+  const title = memory.title ?? "Untitled memory";
+  const summary =
+    memory.summary ?? memory.content ?? memory.rawText ?? "No summary yet.";
+  const importance = memory.importance ?? 0.5;
 
   return (
     <motion.button
@@ -60,9 +71,7 @@ export function MemoryCard({ memory, highlight = false, onSelect }: MemoryCardPr
           </span>
           <div className="flex flex-1 flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold text-foreground">
-                {memory.title}
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground">{title}</h3>
               <Badge
                 variant="outline"
                 className="border-border bg-white/60 font-medium uppercase tracking-wide"
@@ -79,12 +88,12 @@ export function MemoryCard({ memory, highlight = false, onSelect }: MemoryCardPr
               )}
             </div>
             <p className="line-clamp-3 text-sm text-muted-foreground">
-              {memory.summary}
+              {summary}
             </p>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span>{createdAt}</span>
               <span>·</span>
-              <span>{Math.round(memory.importance * 100)}% significance</span>
+              <span>{Math.round(importance * 100)}% significance</span>
               {memory.tags.slice(0, 3).map((tag) => (
                 <Badge
                   key={tag}
@@ -100,7 +109,7 @@ export function MemoryCard({ memory, highlight = false, onSelect }: MemoryCardPr
               <div className="relative overflow-hidden rounded-2xl border border-border/60">
                 <Image
                   src={memory.media.thumbnailUrl}
-                  alt={memory.title}
+                  alt={title}
                   width={640}
                   height={360}
                   className="h-40 w-full object-cover"

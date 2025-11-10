@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getServerSession } from "@/lib/auth/supabase-server";
+import { getServerSession } from "@/lib/supabase/server";
 import {
   DEFAULT_DEMO_USER_ID,
   getMemoryRepository,

@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { chatWithMemories } from "@/lib/ai/chat";
-import { getServerSession } from "@/lib/auth/supabase-server";
-import { DEFAULT_DEMO_USER_ID } from "@/lib/repository/memory-repository";
+import { getServerSession } from "@/lib/supabase/server";
 
 const chatSchema = z.object({
   message: z.string().min(1),
@@ -16,7 +15,10 @@ export async function POST(request: Request) {
     const { message } = chatSchema.parse(payload);
 
     const { session } = await getServerSession();
-    const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+    const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const result = await chatWithMemories(message, userId);
     return NextResponse.json({

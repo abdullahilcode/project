@@ -27,17 +27,17 @@ export function MemoryDetailsDrawer() {
   const memory = useMemoryById(lastViewedMemoryId);
   const createdAt =
     memory?.createdAt &&
-    format(
-      new Date(memory.createdAt),
-      "EEEE, MMMM do yyyy — hh:mm aaaa",
-    );
+    format(new Date(memory.createdAt), "EEEE, MMMM do yyyy — hh:mm aaaa");
 
   return (
     <Sheet
       open={showMemoryDetails}
       onOpenChange={(open) => setMemoryDetails(open, lastViewedMemoryId)}
     >
-      <SheetContent side="right" className="w-[420px] space-y-5 bg-white/90 p-0 pt-4 dark:bg-zinc-950/80">
+      <SheetContent
+        side="right"
+        className="w-[420px] space-y-5 bg-white/90 p-0 pt-4 dark:bg-zinc-950/80"
+      >
         <SheetHeader className="px-6">
           <SheetTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="size-4 text-brand" />
@@ -57,13 +57,18 @@ export function MemoryDetailsDrawer() {
             <div className="space-y-5">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="uppercase tracking-[0.3em]">
+                  <Badge
+                    variant="secondary"
+                    className="uppercase tracking-[0.3em]"
+                  >
                     {memory.kind}
                   </Badge>
-                  <Badge variant="outline">{memory.source}</Badge>
+                  {memory.source && (
+                    <Badge variant="outline">{memory.source}</Badge>
+                  )}
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  {memory.title}
+                  {memory.title ?? "Untitled memory"}
                 </h2>
                 <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   {createdAt}
@@ -74,7 +79,7 @@ export function MemoryDetailsDrawer() {
                 <div className="overflow-hidden rounded-3xl border border-border/60">
                   <Image
                     src={memory.media.url}
-                    alt={memory.title}
+                    alt={memory.title ?? "Memory media"}
                     width={800}
                     height={600}
                     className="h-48 w-full object-cover"
@@ -87,7 +92,10 @@ export function MemoryDetailsDrawer() {
                   AI Summary
                 </h3>
                 <p className="text-sm leading-6 text-foreground">
-                  {memory.summary}
+                  {memory.summary ??
+                    memory.content ??
+                    memory.rawText ??
+                    "No summary available yet."}
                 </p>
               </div>
 
@@ -96,7 +104,9 @@ export function MemoryDetailsDrawer() {
                   Full content
                 </h3>
                 <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
-                  {memory.content}
+                  {memory.content ??
+                    memory.rawText ??
+                    "No content captured yet."}
                 </p>
               </div>
 

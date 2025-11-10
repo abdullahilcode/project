@@ -112,30 +112,30 @@ export function UploadMemoryDialog() {
           </DialogDescription>
         </DialogHeader>
 
-          <form
-            onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
-            className="space-y-5"
+        <form
+          onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+          className="space-y-5"
+        >
+          <Tabs
+            value={activeKind}
+            onValueChange={(value) => {
+              const next = value as MemoryFormValues["kind"];
+              setActiveKind(next);
+              form.setValue("kind", next);
+            }}
           >
-            <Tabs
-              value={activeKind}
-              onValueChange={(value) => {
-                const next = value as MemoryFormValues["kind"];
-                setActiveKind(next);
-                form.setValue("kind", next);
-              }}
-            >
-              <TabsList className="grid w-full grid-cols-5 rounded-2xl bg-white/70 p-1">
-                {["text", "document", "voice", "image", "link"].map((type) => (
-                  <TabsTrigger
-                    key={type}
-                    value={type}
-                    className="rounded-xl text-xs capitalize data-[state=active]:bg-brand data-[state=active]:text-brand-foreground"
-                  >
-                    {type}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <TabsList className="grid w-full grid-cols-5 rounded-2xl bg-white/70 p-1">
+              {["text", "document", "voice", "image", "link"].map((type) => (
+                <TabsTrigger
+                  key={type}
+                  value={type}
+                  className="rounded-xl text-xs capitalize data-[state=active]:bg-brand data-[state=active]:text-brand-foreground"
+                >
+                  {type}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -189,7 +189,12 @@ export function UploadMemoryDialog() {
                     Supabase storage with AES-256 encryption before upload.
                   </p>
                 </div>
-                <Button type="button" variant="outline" size="sm" className="gap-2 rounded-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 rounded-full"
+                >
                   <FileUp className="size-4" />
                   Choose file
                 </Button>

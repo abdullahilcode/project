@@ -20,9 +20,7 @@ export function MemoryTimeline() {
     setSelectedMemory: state.setSelectedMemory,
   }));
   const sortedMemories = useMemo(() => {
-    return [...memories].sort((a, b) =>
-      a.createdAt < b.createdAt ? 1 : -1,
-    );
+    return [...memories].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }, [memories]);
 
   return (

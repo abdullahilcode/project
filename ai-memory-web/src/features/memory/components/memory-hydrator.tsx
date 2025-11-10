@@ -20,13 +20,10 @@ export function MemoryHydrator({
 
   useEffect(() => {
     hydrate({
-      memories: memories.reduce<Record<string, MemoryNode>>(
-        (acc, memory) => {
-          acc[memory.id] = memory;
-          return acc;
-        },
-        {},
-      ),
+      memories: memories.reduce<Record<string, MemoryNode>>((acc, memory) => {
+        acc[memory.id] = memory;
+        return acc;
+      }, {}),
       edges,
       insights,
       isSyncing: false,

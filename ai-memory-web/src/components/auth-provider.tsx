@@ -53,10 +53,10 @@ export function AuthProvider({ initialSession, children }: AuthProviderProps) {
 
   const signInWithOAuth = useCallback(
     async (provider: Provider, redirectPath = "/") => {
-      if (!supabase) return;
+      const nextPath = redirectPath.startsWith("/") ? redirectPath : "/";
       const redirectTo =
         typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectPath)}`
+          ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
           : undefined;
       await supabase.auth.signInWithOAuth({
         provider,

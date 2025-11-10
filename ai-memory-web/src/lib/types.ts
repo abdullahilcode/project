@@ -3,19 +3,22 @@ export type MemoryKind = "text" | "voice" | "image" | "link" | "document";
 export interface MemoryNode {
   id: string;
   userId: string;
-  title: string;
+  title?: string | null;
   kind: MemoryKind;
   source?: "upload" | "recording" | "import" | "ai";
-  summary: string;
-  content: string;
-  transcript?: string;
+  summary?: string | null;
+  rawText?: string | null;
+  content?: string | null;
+  transcript?: string | null;
   tags: string[];
+  space?: string | null;
   sentiments?: Array<{ label: string; score: number }>;
-  importance: number;
+  importance?: number;
   createdAt: string;
   updatedAt: string;
   embeddingStatus: "pending" | "ready" | "failed";
   vectorId?: string;
+  embedding?: number[] | null;
   linkPreviews?: Array<{
     url: string;
     title?: string;
@@ -39,10 +42,10 @@ export interface MemoryNode {
 export interface MemoryEdge {
   id: string;
   userId: string;
-  source: string;
-  target: string;
+  fromId: string;
+  toId: string;
   relationship: string;
-  weight: number;
+  strength: number;
   createdAt: string;
 }
 
@@ -78,4 +81,16 @@ export interface MemoryStoreState {
   selectedMemoryId?: string;
   isSyncing: boolean;
   lastSyncedAt?: string;
+}
+
+export interface Tag {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface MemoryTag {
+  memoryId: string;
+  tagId: string;
 }

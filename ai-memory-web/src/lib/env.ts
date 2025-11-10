@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 const serverSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
   DATABASE_URL: z.string().url().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
@@ -13,8 +15,12 @@ const serverSchema = z.object({
 });
 
 const clientSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url({
+    message: "NEXT_PUBLIC_SUPABASE_URL must be a valid URL",
+  }),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, {
+    message: "NEXT_PUBLIC_SUPABASE_ANON_KEY is required",
+  }),
   NEXT_PUBLIC_ENABLE_ENCRYPTION: z
     .string()
     .transform((value) => value === "true")

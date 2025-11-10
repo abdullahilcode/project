@@ -49,7 +49,10 @@ export function InsightsPanel() {
                       {insight.title}
                     </h3>
                   </div>
-                  <Badge variant="outline" className="uppercase tracking-[0.3em]">
+                  <Badge
+                    variant="outline"
+                    className="uppercase tracking-[0.3em]"
+                  >
                     {insight.type}
                   </Badge>
                 </div>

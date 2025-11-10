@@ -1,76 +1,95 @@
 -- Enable row level security
-alter table if exists "public"."User" enable row level security;
-alter table if exists "public"."Memory" enable row level security;
-alter table if exists "public"."MemoryEdge" enable row level security;
+alter table if exists public."User" enable row level security;
+alter table if exists public."Memory" enable row level security;
+alter table if exists public."MemoryEdge" enable row level security;
+alter table if exists public."Tag" enable row level security;
+alter table if exists public."MemoryTag" enable row level security;
 
--- User table policies (mirror auth users table)
-drop policy if exists "Users can select their profile" on "public"."User";
-create policy "Users can select their profile"
-  on "public"."User"
-  for select
-  using (auth.uid() = id);
+-- Helper: current user id
+create or replace function public.auth_uid() returns uuid
+language sql
+stable
+as $$
+  select coalesce(
+    nullif(current_setting('request.jwt.claim.sub', true), ''),
+    '00000000-0000-0000-0000-000000000000'
+  )::uuid;
+$$;
 
-drop policy if exists "Users can insert their profile" on "public"."User";
-create policy "Users can insert their profile"
-  on "public"."User"
-  for insert
-  with check (auth.uid() = id);
+-- Mirror auth.users → public.User
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+as $$
+begin
+  insert into public."User"(id, email)
+  values (new.id, new.email)
+  on conflict (id) do update set email = excluded.email;
+  return new;
+end;
+$$;
 
-drop policy if exists "Users can update their profile" on "public"."User";
-create policy "Users can update their profile"
-  on "public"."User"
-  for update
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
 
--- Memory table policies
-drop policy if exists "Users can read their memories" on "public"."Memory";
-create policy "Users can read their memories"
-  on "public"."Memory"
-  for select
-  using (auth.uid() = "userId");
+-- USER table policies
+drop policy if exists user_select on public."User";
+create policy user_select on public."User"
+for select using (id = public.auth_uid());
 
-drop policy if exists "Users can insert their memories" on "public"."Memory";
-create policy "Users can insert their memories"
-  on "public"."Memory"
-  for insert
-  with check (auth.uid() = "userId");
+drop policy if exists user_update on public."User";
+create policy user_update on public."User"
+for update using (id = public.auth_uid());
 
-drop policy if exists "Users can update their memories" on "public"."Memory";
-create policy "Users can update their memories"
-  on "public"."Memory"
-  for update
-  using (auth.uid() = "userId")
-  with check (auth.uid() = "userId");
+-- MEMORY policies
+drop policy if exists memory_rw on public."Memory";
+create policy memory_rw on public."Memory"
+for all using ("userId" = public.auth_uid())
+with check ("userId" = public.auth_uid());
 
-drop policy if exists "Users can delete their memories" on "public"."Memory";
-create policy "Users can delete their memories"
-  on "public"."Memory"
-  for delete
-  using (auth.uid() = "userId");
+-- MEMORY EDGE policies
+drop policy if exists edge_rw on public."MemoryEdge";
+create policy edge_rw on public."MemoryEdge"
+for all using ("userId" = public.auth_uid())
+with check ("userId" = public.auth_uid());
 
--- MemoryEdge table policies
-drop policy if exists "Users can read their memory edges" on "public"."MemoryEdge";
-create policy "Users can read their memory edges"
-  on "public"."MemoryEdge"
-  for select
-  using (auth.uid() = "userId");
+-- TAG policies
+drop policy if exists tag_rw on public."Tag";
+create policy tag_rw on public."Tag"
+for all using ("userId" = public.auth_uid())
+with check ("userId" = public.auth_uid());
 
-drop policy if exists "Users can insert their memory edges" on "public"."MemoryEdge";
-create policy "Users can insert their memory edges"
-  on "public"."MemoryEdge"
-  for insert
-  with check (auth.uid() = "userId");
-
-drop policy if exists "Users can update their memory edges" on "public"."MemoryEdge";
-create policy "Users can update their memory edges"
-  on "public"."MemoryEdge"
-  for update
-  using (auth.uid() = "userId")
-  with check (auth.uid() = "userId");
-
-drop policy if exists "Users can delete their memory edges" on "public"."MemoryEdge";
-create policy "Users can delete their memory edges"
-  on "public"."MemoryEdge"
-  for delete
-  using (auth.uid() = "userId");
+-- MEMORY TAG policies
+drop policy if exists memorytag_rw on public."MemoryTag";
+create policy memorytag_rw on public."MemoryTag"
+for all using (
+  exists (
+    select 1
+    from public."Memory" m
+    where m.id = "memoryId"
+      and m."userId" = public.auth_uid()
+  )
+  and exists (
+    select 1
+    from public."Tag" t
+    where t.id = "tagId"
+      and t."userId" = public.auth_uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public."Memory" m
+    where m.id = "memoryId"
+      and m."userId" = public.auth_uid()
+  )
+  and exists (
+    select 1
+    from public."Tag" t
+    where t.id = "tagId"
+      and t."userId" = public.auth_uid()
+  )
+);

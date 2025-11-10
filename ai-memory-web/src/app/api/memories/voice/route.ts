@@ -3,11 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { summarizeMemory } from "@/lib/ai/summarize";
-import { getServerSession } from "@/lib/auth/supabase-server";
-import {
-  DEFAULT_DEMO_USER_ID,
-  getMemoryRepository,
-} from "@/lib/repository/memory-repository";
+import { getServerSession } from "@/lib/supabase/server";
+import { getMemoryRepository } from "@/lib/repository/memory-repository";
 
 const voiceSchema = z.object({
   transcript: z.string().optional(),
@@ -32,7 +29,10 @@ export async function POST(request: Request) {
     });
 
     const { session } = await getServerSession();
-    const userId = session?.user?.id ?? DEFAULT_DEMO_USER_ID;
+    const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const repository = getMemoryRepository();
     const created = await repository.createMemory(userId, {
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       kind: "voice",
       source: "recording",
       summary,
+      rawText: description,
       content: description,
       transcript: parsed.transcript,
       tags,

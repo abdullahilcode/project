@@ -74,15 +74,15 @@ export function VoiceRecorderSheet() {
     setRecording(false);
   }, []);
 
-useEffect(() => {
-  if (showVoiceRecorder) return;
-  const id = requestAnimationFrame(() => {
-    cleanup();
-    setAudioUrl(null);
-    setTranscript("");
-  });
-  return () => cancelAnimationFrame(id);
-}, [showVoiceRecorder, cleanup]);
+  useEffect(() => {
+    if (showVoiceRecorder) return;
+    const id = requestAnimationFrame(() => {
+      cleanup();
+      setAudioUrl(null);
+      setTranscript("");
+    });
+    return () => cancelAnimationFrame(id);
+  }, [showVoiceRecorder, cleanup]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -147,21 +147,21 @@ useEffect(() => {
           </SheetDescription>
         </SheetHeader>
 
-          <Card className="relative flex flex-1 flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner-neon">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <AudioWaveform className="h-24 w-full text-white/30" />
-              <div className="space-y-3 text-center">
-                <p className="text-sm font-medium text-white">
-                  {recording
-                    ? "Listening… speak freely and we\u2019ll capture everything."
-                    : "Press start to capture your voice."}
-                </p>
-                <p className="text-xs text-white/60">
-                  We&apos;ll automatically remove background noise, run Whisper
-                  transcription, tag insights, and compute embeddings.
-                </p>
-              </div>
+        <Card className="relative flex flex-1 flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner-neon">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <AudioWaveform className="h-24 w-full text-white/30" />
+            <div className="space-y-3 text-center">
+              <p className="text-sm font-medium text-white">
+                {recording
+                  ? "Listening… speak freely and we\u2019ll capture everything."
+                  : "Press start to capture your voice."}
+              </p>
+              <p className="text-xs text-white/60">
+                We&apos;ll automatically remove background noise, run Whisper
+                transcription, tag insights, and compute embeddings.
+              </p>
             </div>
+          </div>
 
           <div className="flex items-center justify-center gap-3">
             {!recording ? (

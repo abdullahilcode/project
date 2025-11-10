@@ -13,6 +13,8 @@ const seededMemories: MemoryNode[] = [
     source: "import",
     summary:
       "Outlined the mission for a mindful productivity platform blending design psychology with AI memory augmentation.",
+    rawText:
+      "I mapped the product vision for an intelligent workspace that remembers decisions and surfaces insights during creative flow. Key pillars: adaptive memory retrieval, visual relationship mapping, and ambient nudges. Primary personas are design leads balancing research and shipping velocity.",
     content:
       "I mapped the product vision for an intelligent workspace that remembers decisions and surfaces insights during creative flow. Key pillars: adaptive memory retrieval, visual relationship mapping, and ambient nudges. Primary personas are design leads balancing research and shipping velocity.",
     tags: ["startup", "product", "design", "psychology", "vision"],
@@ -38,6 +40,8 @@ const seededMemories: MemoryNode[] = [
     source: "upload",
     summary:
       "Annotated readings on behavior design and cognitive load theory, emphasizing pattern recognition for creative teams.",
+    rawText:
+      "Key takeaway: designers internalize information faster through narrative-linked memories. Systems that mirror neural pathways aid recall. We should map multi-sensory anchors to project artifacts to reduce decision fatigue.",
     content:
       "Key takeaway: designers internalize information faster through narrative-linked memories. Systems that mirror neural pathways aid recall. We should map multi-sensory anchors to project artifacts to reduce decision fatigue.",
     tags: ["design", "psychology", "cognitive science", "research"],
@@ -63,6 +67,8 @@ const seededMemories: MemoryNode[] = [
     source: "recording",
     summary:
       "Captured an evening voice log describing the routine that triggers deep work, focusing on ambient audio and memory prompts.",
+    rawText:
+      "Transcript: 'When I start the session, I play low-frequency binaural beats and review the memory graph cluster around customer interviews. It helps me lock into the why before sketching interfaces.'",
     content:
       "Transcript: 'When I start the session, I play low-frequency binaural beats and review the memory graph cluster around customer interviews. It helps me lock into the why before sketching interfaces.'",
     tags: ["voice", "ritual", "productivity"],
@@ -93,6 +99,8 @@ const seededMemories: MemoryNode[] = [
     source: "import",
     summary:
       "Key market signals for spatial computing, highlighting potential partners for immersive memory browsing experiences.",
+    rawText:
+      "Saved link: https://futureinterfaces.xyz/spatial-computing-brief. Highlights partnerships with headset manufacturers and frameworks for mixed reality cognition overlays.",
     content:
       "Saved link: https://futureinterfaces.xyz/spatial-computing-brief. Highlights partnerships with headset manufacturers and frameworks for mixed reality cognition overlays.",
     tags: ["market", "strategy", "spatial computing", "xr"],
@@ -124,6 +132,8 @@ const seededMemories: MemoryNode[] = [
     source: "upload",
     summary:
       "Captured Figma board screenshots from the neural graph prototype, with annotations on force-directed layout tuning.",
+    rawText:
+      "Image includes multi-layer nodes representing thought clusters. Notes about variable edge tension based on relationship strength and semantic similarity.",
     content:
       "Image includes multi-layer nodes representing thought clusters. Notes about variable edge tension based on relationship strength and semantic similarity.",
     tags: ["design", "prototype", "graph", "figma"],
@@ -149,37 +159,37 @@ const seededEdges: MemoryEdge[] = [
   {
     id: randomUUID(),
     userId: DEMO_USER_ID,
-    source: seededMemories[0].id,
-    target: seededMemories[1].id,
+    fromId: seededMemories[0].id,
+    toId: seededMemories[1].id,
     relationship: "builds-upon",
-    weight: 0.82,
+    strength: 0.82,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 70).toISOString(),
   },
   {
     id: randomUUID(),
     userId: DEMO_USER_ID,
-    source: seededMemories[0].id,
-    target: seededMemories[2].id,
+    fromId: seededMemories[0].id,
+    toId: seededMemories[2].id,
     relationship: "inspires",
-    weight: 0.74,
+    strength: 0.74,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 32).toISOString(),
   },
   {
     id: randomUUID(),
     userId: DEMO_USER_ID,
-    source: seededMemories[1].id,
-    target: seededMemories[3].id,
+    fromId: seededMemories[1].id,
+    toId: seededMemories[3].id,
     relationship: "references",
-    weight: 0.68,
+    strength: 0.68,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
   },
   {
     id: randomUUID(),
     userId: DEMO_USER_ID,
-    source: seededMemories[4].id,
-    target: seededMemories[0].id,
+    fromId: seededMemories[4].id,
+    toId: seededMemories[0].id,
     relationship: "visualizes",
-    weight: 0.76,
+    strength: 0.76,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
   },
 ];

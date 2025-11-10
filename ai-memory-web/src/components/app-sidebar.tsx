@@ -1,6 +1,12 @@
 "use client";
 
-import { BrainCircuit, ChartScatter, History, Settings2, Share2 } from "lucide-react";
+import {
+  BrainCircuit,
+  ChartScatter,
+  History,
+  Settings2,
+  Share2,
+} from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -9,12 +15,12 @@ import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-    {
-      id: "timeline",
-      label: "Memory Stream",
-      description: "Live capture of everything you save",
-      icon: History,
-    },
+  {
+    id: "timeline",
+    label: "Memory Stream",
+    description: "Live capture of everything you save",
+    icon: History,
+  },
   {
     id: "graph",
     label: "Neural Graph",
@@ -57,7 +63,10 @@ export function AppSidebar() {
             </span>
           </div>
         </Link>
-        <Badge variant="outline" className="border-brand/40 bg-brand/10 text-xs uppercase tracking-wide text-brand">
+        <Badge
+          variant="outline"
+          className="border-brand/40 bg-brand/10 text-xs uppercase tracking-wide text-brand"
+        >
           Beta
         </Badge>
       </div>

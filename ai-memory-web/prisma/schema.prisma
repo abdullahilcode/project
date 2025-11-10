@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,29 +14,34 @@ datasource db {
 }
 
 model User {
-  id        String   @id
+  id        String   @id @db.Uuid
   email     String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   memories Memory[]
   edges    MemoryEdge[]
+  tags     Tag[]
 }
 
 model Memory {
-  id               String       @id @default(uuid())
-  userId           String
-  title            String
-  kind             String
-  source           String?
-  summary          String
-  content          String
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  title            String?
+  summary          String?
+  rawText          String?
+  content          String?
   transcript       String?
-  tags             String[]     @default("{}")
+  kind             String
+  space            String?
+  embedding        Bytes?
   sentiments       Json?
-  importance       Float        @default(0.5)
-  embeddingStatus  String       @default("pending")
+  importance       Float    @default(0.5)
+  embeddingStatus  String   @default("pending")
   vectorId         String?
+  source           String?
   mediaUrl         String?
   mediaThumbnail   String?
   mediaMimeType    String?
@@ -47,30 +51,55 @@ model Memory {
   linkPreviewTitle String?
   linkPreviewDesc  String?
   linkPreviewImage String?
-  encryptionScheme String?      @default("aes-256-gcm")
-  encrypted        Boolean      @default(false)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  encryptionScheme String?  @default("aes-256-gcm")
+  encrypted        Boolean  @default(false)
 
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  outgoingEdges MemoryEdge[] @relation("EdgeSource")
-  incomingEdges MemoryEdge[] @relation("EdgeTarget")
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags      MemoryTag[]
+  edgesFrom MemoryEdge[] @relation("EdgesFrom")
+  edgesTo   MemoryEdge[] @relation("EdgesTo")
 
   @@index([userId])
+  @@index([createdAt])
 }
 
 model MemoryEdge {
-  id           String   @id @default(uuid())
-  userId       String
-  sourceId     String
-  targetId     String
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  fromId       String   @db.Uuid
+  toId         String   @db.Uuid
   relationship String
-  weight       Float    @default(0.5)
+  strength     Float    @default(0.5)
   createdAt    DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source Memory @relation("EdgeSource", fields: [sourceId], references: [id], onDelete: Cascade)
-  target Memory @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  from Memory @relation("EdgesFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Memory @relation("EdgesTo", fields: [toId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([fromId])
+  @@index([toId])
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memories MemoryTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model MemoryTag {
+  memoryId String @db.Uuid
+  tagId    String @db.Uuid
+
+  memory Memory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([memoryId, tagId])
 }

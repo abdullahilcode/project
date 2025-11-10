@@ -33,7 +33,11 @@ export async function encryptPayload<T>(
   const key = await getKeyMaterial(secretKey);
   const iv = randomBytes(12);
   const encoded = new TextEncoder().encode(JSON.stringify(payload));
-  const ciphertext = await subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+  const ciphertext = await subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoded,
+  );
   return {
     ciphertext: Buffer.from(ciphertext).toString("base64"),
     iv: iv.toString("base64"),
