@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Memory {
+  id               String       @id @default(uuid())
+  title            String
+  kind             String
+  source           String?
+  summary          String
+  content          String
+  transcript       String?
+  tags             String[]     @default("{}")
+  sentiments       Json?
+  importance       Float        @default(0.5)
+  embeddingStatus  String       @default("pending")
+  vectorId         String?
+  mediaUrl         String?
+  mediaThumbnail   String?
+  mediaMimeType    String?
+  mediaDurationMs  Int?
+  mediaSizeBytes   Int?
+  linkPreviewUrl   String?
+  linkPreviewTitle String?
+  linkPreviewDesc  String?
+  linkPreviewImage String?
+  encryptionScheme String?      @default("aes-256-gcm")
+  encrypted        Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  outgoingEdges MemoryEdge[] @relation("EdgeSource")
+  incomingEdges MemoryEdge[] @relation("EdgeTarget")
+}
+
+model MemoryEdge {
+  id           String   @id @default(uuid())
+  sourceId     String
+  targetId     String
+  relationship String
+  weight       Float    @default(0.5)
+  createdAt    DateTime @default(now())
+
+  source Memory @relation("EdgeSource", fields: [sourceId], references: [id])
+  target Memory @relation("EdgeTarget", fields: [targetId], references: [id])
+}
